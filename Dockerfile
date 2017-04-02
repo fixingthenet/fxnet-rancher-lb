@@ -58,12 +58,11 @@ RUN set -x \
 
 ENV STACK_DOMAIN none
 ENV HAPROXY_CONFIG /usr/local/etc/haproxy/haproxy.cfg
-ENV HAPROXY_SSL_CERT /usr/local/etc/haproxy/server.pem
 ENV HAPROXY_BACKEND_CONFIG /usr/local/etc/haproxy/haproxy-backends.cfg
 ENV HAPROXY_DOMAIN_MAP /usr/local/etc/haproxy/domain.map
-ENV RANCHER_API_HOST rancher-metadata.rancher.internal
-ENV RANCHER_API_VERSION 2015-12-19
-ENV RANCHER_LABEL map-public-http
+
+ENV RANCHER_URL http://rancher-metadata.rancher.internal/2015-12-19
+ENV RANCHER_LABEL net.fixingthe.lb_config
 ENV RANCHER_TAG all
 
 

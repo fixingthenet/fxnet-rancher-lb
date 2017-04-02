@@ -1,4 +1,4 @@
-rancher_url = ENV["RANCHER_URL"] || "http://192.168.33.111:8080/v1"
+rancher_url = ENV["RANCHER_URL"] || "http://192.168.33.11:8080/v1"
 raise "RANCHER_URL: remove trailing /" if rancher_url[-1] == '/'
 
 ha_config = ENV["HAPROXY_CONFIG"] || "spec/fixtures/haproxy.cfg"
@@ -7,7 +7,7 @@ ha_backends= ENV["HAPROXY_BACKEND_CONFIG"] || "tmp/haproxy-backends.cfg"
 ha_pidfile= ENV["HAPROXY_PID"] || "tmp/haproxy.pid"
 rancher_label=ENV["RANCHER_LABEL"] || "net.fixingthe.on_load_balancer"
 rancher_tag=ENV["RANCHER_TAG"] || "star_fxnet"
-stack_domain= ENV["STACK_DOMAIN"] || raise "ENV STACK_DOMAIN must be set" 
+stack_domain=ENV["STACK_DOMAIN"] || raise("ENV STACK_DOMAIN must be set")
 
 simulation=rancher_url.include?("v1")
 

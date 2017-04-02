@@ -1,0 +1,59 @@
+rancher_url = ENV["RANCHER_URL"] || "http://192.168.33.111:8080/v1"
+raise "RANCHER_URL: remove trailing /" if rancher_url[-1] == '/'
+
+ha_config = ENV["HAPROXY_CONFIG"] || "spec/fixtures/haproxy.cfg"
+ha_domain_map = ENV["HAPROXY_DOMAIN_MAP"] || "tmp/domain.map"
+ha_backends= ENV["HAPROXY_BACKEND_CONFIG"] || "tmp/haproxy-backends.cfg"
+ha_pidfile= ENV["HAPROXY_PID"] || "tmp/haproxy.pid"
+rancher_label=ENV["RANCHER_LABEL"] || "net.fixingthe.on_load_balancer"
+rancher_tag=ENV["RANCHER_TAG"] || "star_fxnet"
+stack_domain= ENV["STACK_DOMAIN"] || raise "ENV STACK_DOMAIN must be set" 
+
+simulation=rancher_url.include?("v1")
+
+# create all the target files
+[ha_config,ha_domain_map,ha_backends].each do |file|
+  unless File.exist?(file)
+    File.open(file, "w") {}
+  end
+end
+
+
+puts "RANCHER_URL: #{rancher_url}"
+puts "HAPROXY_CONFIG: #{ha_config}"
+puts "HAPROXY_DOMAIN_MAP: #{ha_domain_map}"
+puts "HAPROXY_BACKEND_CONFIG: #{ha_backends}"
+puts "HAPROXY_PID: #{ha_pidfile}"
+
+puts "RANCHER_LABEL: #{rancher_label}"
+puts "RANCHER_TAG: #{rancher_tag}"
+puts "STACK_DOMAIN: #{stack_domain}"
+
+puts "SIMULATION!" if simulation
+
+# watch the global config file
+plugin :fswatcher, watch: [ [ ha_config, :modify, :moved_to]
+                            #[ ha_backends, :modify, :moved_to] # no we#ll get dirct notifications
+                          ]
+
+plugin :haproxy_watcher,
+      pidfile_path: ha_pidfile,
+      configfile_paths: [ha_config, ha_backends],
+      simulate: simulation
+
+# RANCHER_URL: http://rancher-metodata.rancher.internal/2015-12-19
+#              http://192....:8080/v1
+
+# watch rancher for backend changes
+plugin :rancher_ha_watcher,
+  rancher_url: rancher_url,
+  tag: rancher_tag,
+  interval: 10,
+  label: rancher_label,
+  domain: stack_domain,
+  domainmap_file: ha_domain_map,
+  backends_file: ha_backends
+
+
+
+
